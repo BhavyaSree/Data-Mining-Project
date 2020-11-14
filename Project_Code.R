@@ -1,6 +1,6 @@
-# set working directory and load data into R
+# Load retail data into R session
 
-setwd("/Users/ram/Desktop/Datamining") 
+# setwd("/Users/ram/dev/bhavya/Data-Mining-Project") 
 
 install.packages("openxlsx")
 library(openxlsx)
@@ -27,6 +27,7 @@ colSums(is.na(data))
 ## As CustomerID is uniqueID, it cannot be replaced with any meaning value
 
 # Omit the rows with Null values in CustomerID.
+library(tidyr)
 retail_data <- data %>%
   drop_na(CustomerID)
 
@@ -62,6 +63,9 @@ max_date
 # Difference between the InvoiceDate and max_date
 retail_data$time_delta <- as.numeric(difftime(as.Date(max_date), as.Date(retail_data$InvoiceDate), units="days"))
 head(retail_data)
+
+installed.packages('dplyr')
+library(dplyr)
 
 # minimum time_delta (maxdate - recent InvoiceDate) of every customer
 Recency <- retail_data %>%
@@ -281,9 +285,13 @@ head(Final_data)
 #################################################################################
 # Association Rules #############################################################
 
+# PreProcessing ################################################################
+
 str(data)
 
 colSums(is.na(data))
+
+library(tidyr)
 
 # Remove rows with Description as Null
 rules_data <- data %>%
@@ -302,6 +310,8 @@ length(unique(rules_data$Description))
 head(rules_data$Description)
 
 # trim the Description
+
+library(stringr)
 rules_data$Description <- str_trim(rules_data$Description)
 
 # Check for Special characters
@@ -314,6 +324,7 @@ head(rules_data$Description)
 # Remove the data with description as Manual
 rules_data <- rules_data[rules_data$Description != 'Manual',]
 
+# Identify the StockCodes having two descriptions and use the descriptions to process the multi descriptions
 df <- data.frame(rules_data %>%
   select(StockCode, Description) %>%
   group_by(StockCode, Description) %>%
@@ -322,53 +333,186 @@ df <- data.frame(rules_data %>%
 x <- df$StockCode[duplicated(df$StockCode)]
 sort(df$Description[df$StockCode %in% x])
 
-rules_data[grep('c$', rules_data$InvoiceNo),]
+rules_data$Description <- ifelse(rules_data$Description == "16 PC CUTLERY SET PANTRY DESIGN", "16 PIECE CUTLERY SET PANTRY DESIGN",
+ifelse(rules_data$Description == "3 TRADITIONAl BISCUIT CUTTERS  SET", "3 TRADITIONAL COOKIE CUTTERS  SET",
+ifelse(rules_data$Description == "ASS COL CIRCLE MOBILE", "ASSORTED COLOURED CIRCLE MOBILE",
+ifelse(rules_data$Description %in% c("BAKING MOULD CHOCOLATE CUP CAKES", "BAKING MOULD CUPCAKE CHOCOLATE"), "BAKING MOULD CHOCOLATE CUPCAKES",
+ifelse(rules_data$Description == "BAKING MOULD TOFFEE CUP  CHOCOLATE", "BAKING MOULD TOFFEE CUP CHOCOLATE", 
+ifelse(rules_data$Description == "BLUE FELT HANGING HEART W FLOWER", "BLUE FELT HANGING HEART WITH FLOWER",
+ifelse(rules_data$Description == "BREAD BIN, DINER STYLE, MINT", "BREAD BIN DINER STYLE MINT",
+ifelse(rules_data$Description == "BREAD BIN, DINER STYLE, IVORY", "BREAD BIN DINER STYLE IVORY",
+ifelse(rules_data$Description == "BUNDLE OF 3 RETRO EXERCISE BOOKS", "BUNDLE OF 3 RETRO NOTE BOOKS",
+ifelse(rules_data$Description == "CHARLOTTE BAG ALPHABET  DESIGN", "CHARLOTTE BAG VINTAGE ALPHABET",
+ifelse(rules_data$Description == "CLASSIC CROME BICYCLE BELL", "CLASSIC CHROME BICYCLE BELL",
+ifelse(rules_data$Description == "CLASSIC GLASS SWEET JAR", "CLASSIC GLASS COOKIE JAR",
+ifelse(rules_data$Description == "COLOUR GLASS. STAR T-LIGHT HOLDER", "COLOURED GLASS STAR T-LIGHT HOLDER",
+ifelse(rules_data$Description == "CORDIAL JUG", "CORDIAL GLASS JUG",
+ifelse(rules_data$Description == "DECORATION , WOBBLY CHICKEN, METAL", "DECORATION WOBBLY CHICKEN",
+ifelse(rules_data$Description == "DECORATION , WOBBLY RABBIT , METAL", "DECORATION WOBBLY RABBIT METAL",
+ifelse(rules_data$Description == "DOILEY BISCUIT TIN", "DOILEY STORAGE TIN",
+ifelse(rules_data$Description == "DOLLCRAFT GIRL AMELIE", "DOLLCRAFT GIRL AMELIE KIT",
+ifelse(rules_data$Description == "DOLLY GIRL MINI RUCKSACK", "DOLLY GIRL MINI BACKPACK",
+ifelse(rules_data$Description == "DOORMAT VINTAGE LEAVES DESIGN", "DOORMAT VINTAGE LEAF",
+ifelse(rules_data$Description == "DOORKNOB CERAMIC IVORY", "DRAWER KNOB CERAMIC IVORY",
+ifelse(rules_data$Description == "DOORKNOB CRACKED GLAZE BLUE" , "DRAWER KNOB CRACKLE GLAZE BLUE",
+ifelse(rules_data$Description == "DOORKNOB CRACKED GLAZE GREEN" , "DRAWER KNOB CRACKLE GLAZE GREEN",
+ifelse(rules_data$Description == "DOORKNOB CRACKED GLAZE PINK" , "DRAWER KNOB CRACKLE GLAZE PINK",
+ifelse(rules_data$Description == "DOORKNOB CRACKED GLAZE IVORY" , "DRAWER KNOB CRACKLE GLAZE IVORY",
+ifelse(rules_data$Description == "ELEPHANT, BIRTHDAY CARD,", "ELEPHANT BIRTHDAY CARD",
+ifelse(rules_data$Description %in% c("FLOWER FAIRY,5 SUMMER B'DRAW LINERS", "FLOWER FAIRY 5 DRAWER LINERS"),"FLOWER FAIRY 5 SUMMER DRAW LINERS",
+ifelse(rules_data$Description == "FLOWER PURPLE CLOCK W/SUCKER", "FLOWER PURPLE CLOCK WITH SUCKER",
+ifelse(rules_data$Description == "FOLDING MIRROR IVORY", "FOLDING BUTTERFLY MIRROR IVORY",
+ifelse(rules_data$Description == "FOLDING MIRROR RED", "FOLDING BUTTERFLY MIRROR RED",
+ifelse(rules_data$Description == "FOLDING MIRROR HOT PINK","FOLDING BUTTERFLY MIRROR HOT PINK", 
+ifelse(rules_data$Description == "FOOD COVER WITH BEADS , SET 2 SIZES", "FOOD COVER WITH BEADS SET 2",
+ifelse(rules_data$Description == "FRYING PAN RED POLKADOT", "FRYING PAN RED RETROSPOT",
+ifelse(rules_data$Description == "GIN AND TONIC DIET METAL SIGN", "GIN + TONIC DIET METAL SIGN",
+ifelse(rules_data$Description == "GOLD M.O.P. ORBIT NECKLACE" ,"GOLD M PEARL  ORBIT NECKLACE",
+ifelse(rules_data$Description == "GYMKHANNA TREASURE BOOK BOX", "GYMKHANA TREASURE BOOK BOX", 
+ifelse(rules_data$Description == "HEN HOUSE W CHICK STANDING","HEN HOUSE WITH CHICK STANDING",
+ifelse(rules_data$Description == "HOME SWEEET HOME 3 PEG HANGER", "HOME SWEET HOME 3 PEG HANGER",
+ifelse(rules_data$Description == "HOT WATER BOTTLE BABUSHKA LARGE", "HOT WATER BOTTLE BABUSHKA",
+ifelse(rules_data$Description == "IVORY PANTRY HANGING LAMP" ,"IVORY CAFE HANGING LAMP",
+ifelse(rules_data$Description == "JARDIN ETCHED GLASS BUTTER DISH","JARDIN ETCHED GLASS CHEESE DISH",
+ifelse(rules_data$Description == "JUMBO BAG SCANDINAVIAN PAISLEY","JUMBO BAG SCANDINAVIAN BLUE PAISLEY",
+ifelse(rules_data$Description == "JUMBO BAG VINTAGE DOILEY","JUMBO BAG VINTAGE DOILY",
+ifelse(rules_data$Description == "LARGE CAKE TOWEL, CHOCOLATE SPOTS","LARGE CAKE TOWEL CHOCOLATE SPOTS",
+ifelse(rules_data$Description == "LARGE JEWELLERY STAND","LARGE DECO JEWELLERY STAND", 
+ifelse(rules_data$Description == "LARGE PICTURE FRAME","LARGE PARLOUR PICTURE FRAME", 
+ifelse(rules_data$Description == "LUNCH BAG RED SPOTTY","LUNCH BAG RED RETROSPOT",  
+ifelse(rules_data$Description == "LUNCH BAG VINTAGE DOILEY","LUNCH BAG VINTAGE DOILY", rules_data$Description ))))))))))))))))))))))))))))))))))))))))))))))))
 
-rules_data %>%
-  ifelse(Description == "16 PC CUTLERY SET PANTRY DESIGN", "16 PIECE CUTLERY SET PANTRY DESIGN",
-  ifelse(Description == "3 TRADITIONAl BISCUIT CUTTERS  SET", "3 TRADITIONAL COOKIE CUTTERS  SET",
-  ifelse(Description == "ANTIQUE SILVER TEA GLASS ETCHED", "ANTIQUE SILVER T-LIGHT GLASS",
-  iflese(Description == "ASS COL CIRCLE MOBILE", "ASSORTED COLOURED CIRCLE MOBILE",
-  iflese(Description %in% c("BAKING MOULD CHOCOLATE CUP CAKES", "BAKING MOULD CUPCAKE CHOCOLATE"), "BAKING MOULD CHOCOLATE CUPCAKES",
-  ifelse(Description == "BAKING MOULD TOFFEE CUP  CHOCOLATE", "BAKING MOULD TOFFEE CUP CHOCOLATE",
-  ifelse(Description == "BLUE FELT HANGING HEART W FLOWER", "BLUE FELT HANGING HEART WITH FLOWER",
-  ifelse(Description == "BREAD BIN, DINER STYLE, MINT", "BREAD BIN DINER STYLE MINT",
-  ifelse(Description == "BREAD BIN, DINER STYLE, IVORY", "BREAD BIN DINER STYLE IVORY",
-  ifelse(Description == "BUNDLE OF 3 RETRO EXERCISE BOOKS", "BUNDLE OF 3 RETRO NOTE BOOKS",
-  ifelse(Description == "CHARLOTTE BAG ALPHABET  DESIGN", "CHARLOTTE BAG VINTAGE ALPHABET",
-  ifelse(Description == "CLASSIC CROME BICYCLE BELL", "CLASSIC CHROME BICYCLE BELL",
-  ifelse(Description == "CLASSIC GLASS SWEET JAR", "CLASSIC GLASS COOKIE JAR",
-  ifelse(Description == "COLOUR GLASS. STAR T-LIGHT HOLDER", "COLOURED GLASS STAR T-LIGHT HOLDER",
-  ifelse(Description == "CORDIAL JUG", "CORDIAL GLASS JUG",
-  ifelse(Description == "DECORATION , WOBBLY CHICKEN, METAL", "DECORATION WOBBLY CHICKEN",
-  ifelse(Description == "DECORATION , WOBBLY RABBIT , METAL", "DECORATION WOBBLY RABBIT METAL",
-  ifelse(Description == "DOILEY BISCUIT TIN", "DOILEY STORAGE TIN",
-  ifelse(Description == "DOLLCRAFT GIRL AMELIE", "DOLLCRAFT GIRL AMELIE KIT",
-  ifelse(Description == "DOLLY GIRL MINI RUCKSACK", "DOLLY GIRL MINI BACKPACK",
-  ifelse(Description == "DOORMAT VINTAGE LEAVES DESIGN", "DOORMAT VINTAGE LEAF",
-  ifelse(Description == "DOORKNOB CERAMIC IVORY", "DRAWER KNOB CERAMIC IVORY",
-  ifelse(Description == "DOORKNOB CRACKED GLAZE BLUE" , "DRAWER KNOB CRACKLE GLAZE BLUE",
-  ifelse(Description == "DOORKNOB CRACKED GLAZE GREEN" , "DRAWER KNOB CRACKLE GLAZE GREEN",
-  ifelse(Description == "DOORKNOB CRACKED GLAZE PINK" , "DRAWER KNOB CRACKLE GLAZE PINK",
-  ifelse(Description == "DOORKNOB CRACKED GLAZE IVORY" , "DRAWER KNOB CRACKLE GLAZE IVORY",
-  ifelse(Description == "ELEPHANT, BIRTHDAY CARD,", "ELEPHANT BIRTHDAY CARD",
-  ifelse(Description %in% c("FLOWER FAIRY,5 SUMMER B'DRAW LINERS", "FLOWER FAIRY 5 DRAWER LINERS"),"FLOWER FAIRY 5 SUMMER DRAW LINERS",
-  ifelse(Description == "FLOWER PURPLE CLOCK W/SUCKER", "FLOWER PURPLE CLOCK WITH SUCKER",
-  ifelse(Description == "FOLDING MIRROR IVORY", "FOLDING BUTTERFLY MIRROR IVORY",
-  ifelse(Description == "FOLDING MIRROR RED", "FOLDING BUTTERFLY MIRROR RED",
-  ifelse(Description == "FOLDING MIRROR HOT PINK","FOLDING BUTTERFLY MIRROR HOT PINK",
-  ifelse(Description == "FOOD COVER WITH BEADS , SET 2 SIZES", "FOOD COVER WITH BEADS SET 2"),
-  ifelse(Description == "FRYING PAN RED POLKADOT", "FRYING PAN RED RETROSPOT",
-  ifelse(Description == "GIN AND TONIC DIET METAL SIGN", "GIN + TONIC DIET METAL SIGN",
-  ifelse(Description == "GOLD M.O.P. ORBIT NECKLACE" ,"GOLD M PEARL  ORBIT NECKLACE",
-  ifelse(Description == "GYMKHANNA TREASURE BOOK BOX", "GYMKHANA TREASURE BOOK BOX",
-  ifelse(Description == "HEART TRELLIS TRIPLE T-LIGHT HOLDER","HANGING JAM JAR T-LIGHT HOLDERS", 
-  ifelse(Description == "HEN HOUSE W CHICK STANDING","HEN HOUSE WITH CHICK STANDING",
-  ifelse(Description == "HOME SWEEET HOME 3 PEG HANGER", "HOME SWEET HOME 3 PEG HANGER",
-  ifelse(Description == "HOT WATER BOTTLE BABUSHKA LARGE", "HOT WATER BOTTLE BABUSHKA",
-  ifelse(Description == "IVORY PANTRY HANGING LAMP" ,"IVORY CAFE HANGING LAMP",
-  ifelse(Description == "JARDIN ETCHED GLASS BUTTER DISH","JARDIN ETCHED GLASS CHEESE DISH",
-  ifelse(Description == "JUMBO BAG SCANDINAVIAN PAISLEY","JUMBO BAG SCANDINAVIAN BLUE PAISLEY",
-         ))) )))   ))))))))))))))))))))))))))))))))))
+rules_data$Description <- ifelse(rules_data$Description == "MARIE ANTOIENETT TRINKET BOX GOLD", "MARIE ANTOINETTE TRINKET BOX GOLD",
+ifelse(rules_data$Description == "MEDIUM PARLOUR FRAME", "MEDIUM PARLOUR PICTURE FRAME",
+ifelse(rules_data$Description == "MINITURE ANTIQUE ROSE HOOK IVORY", "MINIATURE ANTIQUE ROSE HOOK IVORY",
+ifelse(rules_data$Description == "MINT DINER CLOCK", "MINT DINER WALL CLOCK", 
+ifelse(rules_data$Description %in% c("MISTLETOE HEART WREATH CREAM", "MISELTOE HEART WREATH WHITE"),"MISELTOE HEART WREATH CREAM", 
+ifelse(rules_data$Description == "MONEY BOX FIRST ADE DESIGN", "MONEY BOX FIRST AID DESIGN",
+ifelse(rules_data$Description == "N0 SINGING METAL SIGN", "NO SINGING METAL SIGN",
+ifelse(rules_data$Description == "PACK 3 BOXES BIRD PANETTONE", "PACK 3 BOXES BIRD PANNETONE", 
+ifelse(rules_data$Description == "PACK 3 BOXES CHRISTMAS PANETTONE", "PACK 3 BOXES CHRISTMAS PANNETONE",
+ifelse(rules_data$Description == "PACK OF 12 DOILEY TISSUES","PACK OF 12 VINTAGE DOILY TISSUES",
+ifelse(rules_data$Description == "PACK OF 6 PANETTONE GIFT BOXES","PACK OF 6 PANNETONE GIFT BOXES",
+ifelse(rules_data$Description == "PAPER LANTERN 5 POINT STAR MOON 30", "PAPER LANTERN 5 POINT STAR MOON",
+ifelse(rules_data$Description == "PARTY CONES CANDY DECORATION","PARTY CONES CANDY TREE DECORATION",
+ifelse(rules_data$Description == "PEG BAG APPLE DESIGN","PEG BAG APPLES DESIGN",
+ifelse(rules_data$Description == "PICNIC BASKET WICKER 60 PIECES", "PICNIC BASKET WICKER SMALL",
+ifelse(rules_data$Description == "PLAYING CARDS VINTAGE DOILEY","PLAYING CARDS VINTAGE DOILY",
+ifelse(rules_data$Description == "RETO LEAVES MAGNETIC SHOPPING LIST","RETRO LEAVES MAGNETIC NOTEPAD",
+ifelse(rules_data$Description == "ROCOCO WALL MIROR" ,"ROCOCO WALL MIRROR WHITE",
+ifelse(rules_data$Description == "RUSTIC STRAWBERRY JAMPOT LARGE","RUSTIC STRAWBERRY JAM POT LARGE",
+ifelse(rules_data$Description == "RUSTIC STRAWBERRY JAMPOT SMALL","RUSTIC STRAWBERRY JAM POT SMALL",
+ifelse(rules_data$Description == "SET 10 LIGHTS NIGHT OWL", "SET 10 NIGHT OWL LIGHTS",
+ifelse(rules_data$Description %in% c("SET 12 COLOUR PENCILS DOILEY", "SET 12 COLOURING PENCILS DOILEY"), "SET 12 COLOURING PENCILS DOILY",
+ifelse(rules_data$Description %in% c("SET 36 COLOUR PENCILS DOILEY", "SET 36 COLOURING PENCILS DOILEY"), "SET 36 COLOURING PENCILS DOILY",
+ifelse(rules_data$Description == "SET 8 CANDLES VINTAGE DOILEY","SET 8 CANDLES VINTAGE DOILY",
+ifelse(rules_data$Description == "SET OF 12 T-LIGHTS VINTAGE DOILEY","SET OF 12 T-LIGHTS VINTAGE DOILY",
+ifelse(rules_data$Description == "SET OF 4 KNICK KNACK TINS DOILEY","SET OF 4 KNICK KNACK TINS DOILY",        
+ifelse(rules_data$Description == "SET OF 4 KNICK KNACK TINS LEAF","SET OF 4 KNICK KNACK TINS LEAVES", 
+ifelse(rules_data$Description == "SET/5 RED RETROSPOT LID GLASS BOWLS","SET/5 RED SPOTTY LID GLASS BOWLS",
+ifelse(rules_data$Description == "SILVER/BLACK ORBIT NECKLACE", "SILVER AND BLACK ORBIT NECKLACE",
+ifelse(rules_data$Description == "SILVER/MOP ORBIT NECKLACE", "SILVER M.O.P. ORBIT NECKLACE",
+ifelse(rules_data$Description == "SMALL DECO JEWELLERY STAND","SMALL JEWELLERY STAND",
+ifelse(rules_data$Description == "SMALL PARLOUR FRAME","SMALL PARLOUR PICTURE FRAME",
+ifelse(rules_data$Description == "SMALL POP BOX FUNKY MONKEY","SMALL POP BOX,FUNKY MONKEY",
+ifelse(rules_data$Description == "SMOKEY GREY COLOUR D.O.F. GLASS", "SMOKEY GREY COLOUR GLASS",
+ifelse(rules_data$Description == "SPACE BOY CHILDRENS CUP", "SPACEBOY CHILDRENS CUP",
+ifelse(rules_data$Description == "SPACEBOY MINI RUCKSACK", "SPACEBOY MINI BACKPACK",
+ifelse(rules_data$Description == "SQUARECUSHION COVER PINK UNION FLAG", "SQUARECUSHION COVER PINK UNION JACK",
+ifelse(rules_data$Description == "STORAGE TIN VINTAGE DOILEY","STORAGE TIN VINTAGE DOILY",
+ifelse(rules_data$Description == "STRAWBERRY CERAMIC TRINKET BOX","STRAWBERRY CERAMIC TRINKET POT",
+ifelse(rules_data$Description == "SWEETHEART CAKESTAND 3 TIER","SWEETHEART 3 TIER CAKE STAND", 
+ifelse(rules_data$Description == "SWISS ROLL TOWEL, PINK  SPOTS","SWISS ROLL TOWEL PINK  SPOTS", 
+ifelse(rules_data$Description == "TRAVEL CARD WALLET RETRO PETALS", "TRAVEL CARD WALLET VINTAGE LEAF",
+ifelse(rules_data$Description == "TUMBLER, BAROQUE", "TUMBLER BAROQUE",
+ifelse(rules_data$Description == "TUMBLER, NEW ENGLAND", "TUMBLER NEW ENGLAND",
+ifelse(rules_data$Description == "TUSCAN VILLA DOVECOTE", "TUSCAN VILLA DOVECOTE BIRD FEEDER",
+ifelse(rules_data$Description == "VINTAGE  2 METRE FOLDING RULER", "VINTAGE  2 METER FOLDING RULER",
+ifelse(rules_data$Description == "VINTAGE ENGRAVED HEART", "VINTAGE EMBOSSED HEART",
+ifelse(rules_data$Description == "VIPPASSPORT COVER", "VIP PASSPORT COVER",  rules_data$Description ))))))))))))))))))))))))))))))))))))))))))))))))
 
-rules_data$StockCode[(rules_data$Description == "JUMBO BAG SCANDINAVIAN PAISLEY")]
+rules_data$Description <- ifelse(rules_data$Description == "WALL ART BICYCLE SAFTEY", "WALL ART BICYCLE SAFETY",
+ifelse(rules_data$Description == "WALL ART,ONLY ONE PERSON", "WALL ART ONLY ONE PERSON",
+ifelse(rules_data$Description == "WHITE WIRE PLANT POT HOLDER", "WHITE HEARTS WIRE PLANT POT HOLDER",
+ifelse(rules_data$Description == "WHITE METAL LANTERN", "WHITE MOROCCAN METAL LANTERN",
+ifelse(rules_data$Description == "WOODLAND MINI RUCKSACK", "WOODLAND MINI BACKPACK", 
+ifelse(rules_data$Description == "WRAP RED DOILEY", "WRAP RED VINTAGE DOILY"  ,
+ifelse(rules_data$Description == "WRAP VINTAGE PETALS  DESIGN", "WRAP VINTAGE LEAF DESIGN",
+ifelse(rules_data$Description == "ZINC PLANT POT HOLDER" ,"ZINC HEARTS PLANT POT HOLDER",
+ifelse(rules_data$Description == "ZINC  STAR T-LIGHT HOLDER", "ZINC STAR T-LIGHT HOLDER",
+ifelse(rules_data$Description == "ZINC T-LIGHT HOLDER STAR LARGE", "ZINC T-LIGHT HOLDER STARS LARGE", rules_data$Description ))))))))))
+
+str(rules_data)
+# 529782
+
+################################################################################
+
+library(plyr)
+
+# Use ddply function to get all the items bought together in a row separated by ,.
+# To get the items bought together, get Description by grouping the data on InvoiceNo.
+
+Association_data <- ddply(rules_data,c("InvoiceNo"),
+                            function(x)paste(x$Description,
+                            collapse = ","))
+str(Association_data)
+
+Association_data$InvoiceNo <- NULL
+colnames(Association_data) <- c("items")
+Association_data$items <- as.factor(Association_data$items)
+
+str(Association_data)
+
+# To view the transactional_data in the better format
+write.csv(Association_data, "transactional_data.csv", quote=FALSE, row.names = FALSE)
+
+# convert data to transactional data
+library(arules)
+
+transactional_data <- read.transactions('transactional_data.csv', format = 'basket', sep=',', quote="")
+
+rules.001 <- apriori(transactional_data, parameter=list(support=0.005, confidence = 0.8))
+
+rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 0.1))
+
+inspect(rules.02)
+
+rules.01 <- apriori(transactional_data, parameter=list(support=0.01, confidence = 1.0))
+
+inspect(sort(rules.01, by='confidence'))
+
+rules.009 <- apriori(transactional_data, parameter=list(support=0.009, confidence = 1.0))
+
+inspect(sort(rules.009, by='lift'))
+
+rules <- sort(rules.009, by='lift')
+
+# Prune the Redundant Rules ####################################################
+
+# Check for the rules which are subset of other rules
+subset_matrix <- is.subset(rules,rules)
+subset_matrix
+
+# Assigning FALSE to diagonal line (as every rule is a subset of it's own, neglect diagonal positions)
+subset_matrix[lower.tri(subset.matrix, diag=T)] <- F
+subset_matrix
+
+# Check the item sets which are redudant and which are not
+redundant_check <- apply(subset.matrix, 2, any)
+redundant_check
+
+rules.pruned <- rules[!redundant]
+inspect(rules.pruned)
+        
+### Evaluate the rules ########################################################
+
+# We evaluate the association rules with support, confidence, lift values
+interestMeasure(rules.pruned, c("support", "confidence", "lift"), transactional_data)
+
+inspect(sort(rules.pruned, by='support'))
+
+install.packages("arulesViz")
+library(grid)
+library(arulesViz)
+
+plot(rules.pruned, method="graph")
