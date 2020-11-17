@@ -50,7 +50,7 @@ max_date
 retail_data$time_delta <- as.numeric(difftime(as.Date(max_date), as.Date(retail_data$InvoiceDate), units="days"))
 head(retail_data$time_delta, 2)
 
-installed.packages('dplyr')
+install.packages('dplyr')
 library(dplyr)
 
 # minimum time_delta (maxdate - recent InvoiceDate) of every customer
@@ -462,19 +462,15 @@ write.csv(Association_data, "transactional_data.csv", quote=FALSE, row.names = F
 library(arules)
 transactional_data <- read.transactions('transactional_data.csv', format = 'basket', sep=',', quote="")
 
-rules.001 <- apriori(transactional_data, parameter=list(support=0.005, confidence = 0.8))
+rules.03 <- apriori(transactional_data, parameter=list(support=0.03, confidence = 1.0))
 
-rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 0.1))
-
-inspect(rules.02)
+rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 1.0))
 
 rules.01 <- apriori(transactional_data, parameter=list(support=0.01, confidence = 1.0))
 
-inspect(sort(rules.01, by='confidence'))
-
 rules.009 <- apriori(transactional_data, parameter=list(support=0.009, confidence = 1.0))
 
-inspect(sort(rules.009, by='lift'))
+inspect(sort(rules.009, by='support'))
 
 rules <- sort(rules.009, by='lift')
 
@@ -482,15 +478,12 @@ rules <- sort(rules.009, by='lift')
 
 # Check for the rules which are subset of other rules
 subset_matrix <- is.subset(rules,rules)
-subset_matrix
 
 # Assigning FALSE to diagonal line (as every rule is a subset of it's own, neglect diagonal positions)
-subset_matrix[lower.tri(subset.matrix, diag=T)] <- F
-subset_matrix
+subset_matrix[lower.tri(subset_matrix, diag=T)] <- F
 
 # Check the item sets which are redudant and which are not
-redundant_check <- apply(subset.matrix, 2, any)
-redundant_check
+redundant <- apply(subset_matrix, 2, any)
 
 rules.pruned <- rules[!redundant]
 inspect(rules.pruned)
@@ -500,9 +493,9 @@ inspect(rules.pruned)
 # We evaluate the association rules with support, confidence, lift values
 interestMeasure(rules.pruned, c("support", "confidence", "lift"), transactional_data)
 
-inspect(sort(rules.pruned, by='support'))
+inspect(sort(rules.pruned, by='lift'))
 
-install.packages("arulesViz")
+# install.packages("arulesViz")
 library(grid)
 library(arulesViz)
 
