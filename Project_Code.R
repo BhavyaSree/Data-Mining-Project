@@ -1,4 +1,7 @@
-# Load retail data into R session
+# Set working directory and Load retail data into R session
+
+# setwd("/Users/ram/dev/bhavya/Data-Mining-Project")
+
 install.packages("openxlsx")
 library(openxlsx)
 
@@ -50,7 +53,7 @@ max_date
 retail_data$time_delta <- as.numeric(difftime(as.Date(max_date), as.Date(retail_data$InvoiceDate), units="days"))
 head(retail_data$time_delta, 2)
 
-install.packages('dplyr')
+# install.packages('dplyr')
 library(dplyr)
 
 # minimum time_delta (maxdate - recent InvoiceDate) of every customer
@@ -206,18 +209,26 @@ fviz_nbclust(Clust_Data, hcut, method = "silhouette")
 
 # calculate distance between vectors of Clust_Data
 d <- dist(Clust_Data, method='euclidean')
-
 HC_model1 <- hclust(d, method='ward.D2')
-plot(HC_model)
+
+# Dendrogram, customizing the plot to remove labels
+HC_model1_d <- as.dendrogram(HC_model1)
+nodePar <- list(lab.cex = 0.6, pch = c(NA, 19), 
+                cex = 0.2, col = "skyblue")
+plot(HC_model1_d, ylab = "Height", nodePar = nodePar, leaflab = "none",
+     main = "Dendrogram with K=2")
 rect.hclust(HC_model1, k=2, border="green")
 
 groups <- cutree(HC_model1, k=2)
 HC_data1 <- data.frame(Clust_Data, groups)
 head(HC_data1, 1)
 
+# size of groups
 HC_data1 %>%
   group_by(groups) %>%
   summarise(count=n())
+
+boxplot(HC_data1)
 
 # Elbow method
 set.seed(123)
@@ -225,19 +236,27 @@ fviz_nbclust(Clust_Data, hcut, method='wss')
 # From the elbow method, at k=3, the total within sum of squares will be less.
 
 HC_model2 <- hclust(d, method='ward.D2')
-plot(HC_model2)
+
+# Dendrogram, customizing the plot to remove labels
+HC_model2_d <- as.dendrogram(HC_model1)
+nodePar <- list(lab.cex = 0.6, pch = c(NA, 19), 
+                cex = 0.2, col = "skyblue")
+plot(HC_model2_d, ylab = "Height", nodePar = nodePar, leaflab = "none",
+     main = "Dendrogram with K=3")
 rect.hclust(HC_model2, k=3, border="green")
 
 groups <- cutree(HC_model2, k=3)
+
 HC_data2 <- data.frame(Clust_Data, groups)
 head(HC_data2, 1)
 
+# size of groups
 HC_data2 %>%
   group_by(groups) %>%
   summarise(count=n())
 
-
 ## Evaluation ##################################################################
+
 ## Using KNN classification to evaluate the Hierarchical clustering result
 vars <- c('Recency', 'Frequency', 'Monetry')
 
@@ -261,6 +280,17 @@ KNN_Model_HC2 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10
                        tuneGrid=expand.grid(k=1:10))
 print(KNN_Model_HC2)
 
+## Clustering Validation
+
+library(clValid)
+
+# Internal
+internal <- clValid(as.matrix(Clust_Data), nClust = 2:5, 
+                    clMethods = c("hierarchical","kmeans"),
+                   validation = "internal")
+
+summary(internal)
+
 ## Conclusion ##################################################################
 
 RFM_data['Cluster'] <- HC_data1$groups
@@ -281,6 +311,10 @@ Final_data %>%
   summarise(count=n())
 
 head(Final_data)
+
+summary(Final_data)
+
+boxplot()
 
 #################################################################################
 # Association Rules #############################################################
