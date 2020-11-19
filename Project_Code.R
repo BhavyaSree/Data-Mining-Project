@@ -228,8 +228,6 @@ HC_data1 %>%
   group_by(groups) %>%
   summarise(count=n())
 
-boxplot(HC_data1)
-
 # Elbow method
 set.seed(123)
 fviz_nbclust(Clust_Data, hcut, method='wss')
@@ -281,11 +279,10 @@ KNN_Model_HC2 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10
 print(KNN_Model_HC2)
 
 ## Clustering Validation
-
 library(clValid)
 
 # Internal
-internal <- clValid(as.matrix(Clust_Data), nClust = 2:5, 
+internal <- clValid(as.matrix(Clust_Data), nClust = 2:4, 
                     clMethods = c("hierarchical","kmeans"),
                    validation = "internal")
 
