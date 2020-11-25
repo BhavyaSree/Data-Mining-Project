@@ -347,6 +347,7 @@ head(rules_data[grepl('[:lower:]', rules_data$Description),])
 # Remove the data with description as Manual
 rules_data <- rules_data[rules_data$Description != 'Manual',]
 
+library(dplyr)
 # Identify the StockCodes having two descriptions and use the descriptions to process the multi descriptions
 df <- data.frame(rules_data %>%
   select(StockCode, Description) %>%
@@ -474,8 +475,13 @@ library(plyr)
 # Use ddply function to get all the items bought together in a row separated by ,.
 # To get the items bought together, get Description by grouping the data on InvoiceNo.
 Association_data <- ddply(rules_data,c("InvoiceNo"),
-                            function(x)paste(x$Description,
-                            collapse = ","))
+                         function(x)paste(x$Description,
+                                           collapse = ","))
+
+Association_data <- ddply(rules_data,c("InvoiceNo"),
+                           function(x)paste(x$StockCode,
+                                            collapse = ","))
+
 str(Association_data)
 
 Association_data$InvoiceNo <- NULL
@@ -493,15 +499,18 @@ write.csv(Association_data, "transactional_data.csv", quote=FALSE, row.names = F
 library(arules)
 transactional_data <- read.transactions('transactional_data.csv', format = 'basket', sep=',', quote="")
 
-rules.03 <- apriori(transactional_data, parameter=list(support=0.03, confidence = 1.0))
+rules.03 <- apriori(transactional_data, parameter=list(support=0.035, confidence = 0.7))
+# 4
 
-rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 1.0))
+rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 0.7))
+# 12
 
-rules.01 <- apriori(transactional_data, parameter=list(support=0.01, confidence = 1.0))
+rules.01 <- apriori(transactional_data, parameter=list(support=0.017, confidence = 0.7))
+# 32
 
 rules.009 <- apriori(transactional_data, parameter=list(support=0.009, confidence = 1.0))
 
-inspect(sort(rules.009, by='support'))
+inspect(sort(rules.02, by='support'))
 
 rules <- sort(rules.009, by='lift')
 
