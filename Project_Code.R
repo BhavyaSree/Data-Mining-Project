@@ -160,17 +160,17 @@ KM_Model2$centers
 
 ## Evaluation ##################################################################
 ## Use KNN classification to evaluate the Clustering model
-vars <- c('Recency', 'Frequency', 'Monetry')
+#vars <- c('Recency', 'Frequency', 'Monetry')
 # At K=4
-KM_data1 <- data.frame(Clust_Data, KM_Model1$cluster)
-names(KM_data1)[names(KM_data1)=='KM_Model1.cluster'] <- 'Cluster'
-head(KM_data1, 1)
+#KM_data1 <- data.frame(Clust_Data, KM_Model1$cluster)
+#names(KM_data1)[names(KM_data1)=='KM_Model1.cluster'] <- 'Cluster'
+#head(KM_data1, 1)
 
-KM_data1$Cluster <- factor(KM_data1$Cluster)
-x <- KM_data1[vars]
-y <- KM_data1$Cluster
+#KM_data1$Cluster <- factor(KM_data1$Cluster)
+#x <- KM_data1[vars]
+#y <- KM_data1$Cluster
 
-library(caret)
+#library(caret)
 set.seed(123)
 KNN_Model1 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
                    tuneGrid=expand.grid(k=1:10))
