@@ -158,48 +158,6 @@ KM_Model2$size
 # Center of clusters
 KM_Model2$centers
 
-## Evaluation ##################################################################
-## Use KNN classification to evaluate the Clustering model
-#vars <- c('Recency', 'Frequency', 'Monetry')
-# At K=4
-#KM_data1 <- data.frame(Clust_Data, KM_Model1$cluster)
-#names(KM_data1)[names(KM_data1)=='KM_Model1.cluster'] <- 'Cluster'
-#head(KM_data1, 1)
-
-#KM_data1$Cluster <- factor(KM_data1$Cluster)
-#x <- KM_data1[vars]
-#y <- KM_data1$Cluster
-
-#library(caret)
-#set.seed(123)
-#KNN_Model1 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
-                   tuneGrid=expand.grid(k=1:10))
-print(KNN_Model1)
-
-# At K=3 Clusters
-KM_data2 <- data.frame(Clust_Data, KM_Model2$cluster)
-names(KM_data2)[names(KM_data2)=='KM_Model2.cluster'] <- 'Cluster'
-head(KM_data2,1)
-
-KM_data2$Cluster <- factor(KM_data2$Cluster)
-x <- KM_data2[vars]
-y <- KM_data2$Cluster
-
-set.seed(123)
-KNN_Model2 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
-                   tuneGrid=expand.grid(k=1:10))
-print(KNN_Model2)
-
-#KM_data <- data.frame(Clust_Data, KM_Model2$cluster)
-#names(KM_data)[names(KM_data)=='KM_Model2.cluster'] <- 'Cluster'
-#head(KM_data)
-
-#KM_Model2$size
-
-#KM_data %>%
-#  group_by(Cluster) %>%
-#  summarise(count=n())
-
 ## Hierarchical Clustering #####################################################
 
 # Silhouette Score
@@ -219,13 +177,13 @@ plot(HC_model1_d, ylab = "Height", nodePar = nodePar, leaflab = "none",
      main = "Dendrogram with K=2")
 rect.hclust(HC_model1, k=2, border="green")
 
-groups <- cutree(HC_model1, k=2)
-HC_data1 <- data.frame(Clust_Data, groups)
+groups2 <- cutree(HC_model1, k=2)
+HC_data1 <- data.frame(Clust_Data, groups2)
 head(HC_data1, 1)
 
 # size of groups
 HC_data1 %>%
-  group_by(groups) %>%
+  group_by(groups2) %>%
   summarise(count=n())
 
 # Elbow method
@@ -243,42 +201,19 @@ plot(HC_model2_d, ylab = "Height", nodePar = nodePar, leaflab = "none",
      main = "Dendrogram with K=3")
 rect.hclust(HC_model2, k=3, border="green")
 
-groups <- cutree(HC_model2, k=3)
+groups3 <- cutree(HC_model2, k=3)
 
-HC_data2 <- data.frame(Clust_Data, groups)
+HC_data2 <- data.frame(Clust_Data, groups3)
 head(HC_data2, 1)
 
 # size of groups
 HC_data2 %>%
-  group_by(groups) %>%
+  group_by(groups3) %>%
   summarise(count=n())
 
 ## Evaluation ##################################################################
 
-## Using KNN classification to evaluate the Hierarchical clustering result
-vars <- c('Recency', 'Frequency', 'Monetry')
-
-# At K=2
-HC_data1$groups <- factor(HC_data1$groups)
-x <- HC_data1[vars]
-y <- HC_data1$groups
-
-set.seed(101)
-KNN_Model_HC1 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
-                      tuneGrid=expand.grid(k=1:10))
-print(KNN_Model_HC1)
-
-# At K=3
-HC_data2$groups <- factor(HC_data2$groups)
-x <- HC_data2[vars]
-y <- HC_data2$groups
-
-set.seed(101)
-KNN_Model_HC2 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
-                       tuneGrid=expand.grid(k=1:10))
-print(KNN_Model_HC2)
-
-## Clustering Validation
+## Internal validation
 library(clValid)
 
 # Internal
@@ -288,21 +223,32 @@ internal <- clValid(as.matrix(Clust_Data), nClust = 2:4,
 
 summary(internal)
 
-## Conclusion ##################################################################
+## External validation
 
-RFM_data['Cluster'] <- HC_data1$groups
+# As my data is not pre-labeled, 
+# I cannot use External validation measures like Accuracy by implementing Classification
+
+## Manual evaluation
+
+# Centers of clusters from K-means Model with K= 4
+KM_Model1$centers
+# Centers of clusters from K-means Model with K= 3
+KM_Model2$centers
+# Centers of clusters from Hierarchical clustering with K = 2
+apply (Clust_Data, 2, function (x) tapply (x, groups2, mean))
+# Centers of clusters from Hierarchical clustering with K = 3
+apply (Clust_Data, 2, function (x) tapply (x, groups3, mean))
+
+# Both From Manual evaluation and Internal validation measures 
+# Hierarchical Clustering with clusters as 2 is the best model.
+
+## Interpreting the Results & Conclusion #######################################
+
+RFM_data['Cluster'] <- HC_data1$groups2
 # head(RFM_data)
 summary(RFM_data)
 
-customers_1 <- head(RFM_data$CustomerID[RFM_data$Cluster == 1])
-filter(RFM_data, RFM_data$CustomerID %in% customers_1)
-
-customers_2 <- head(RFM_data$CustomerID[RFM_data$Cluster == 2])
-filter(RFM_data, RFM_data$CustomerID %in% customers_2)
-# Best Customers
-
-Final_data <- data.frame(RFM_data[c('CustomerID', 'Cluster')])
-
+Final_data <- data.frame(RFM_data)
 Final_data %>%
   group_by(Cluster) %>%
   summarise(count=n())
@@ -311,7 +257,15 @@ head(Final_data)
 
 summary(Final_data)
 
-boxplot()
+# Manual Evaluation on Final Data to interpret the results
+apply (Final_data, 2, function (x) tapply (x, groups2, mean))
+
+# Interpreting the results
+customers_1 <- head(RFM_data$CustomerID[RFM_data$Cluster == 1])
+filter(RFM_data, RFM_data$CustomerID %in% customers_1)
+
+customers_2 <- head(RFM_data$CustomerID[RFM_data$Cluster == 2])
+filter(RFM_data, RFM_data$CustomerID %in% customers_2)
 
 #################################################################################
 # Association Rules #############################################################
@@ -469,6 +423,9 @@ ifelse(rules_data$Description == "ZINC T-LIGHT HOLDER STAR LARGE", "ZINC T-LIGHT
 str(rules_data)
 # 529782
 
+length(unique(rules_data$StockCode))
+length(unique(rules_data$Description))
+
 ## Formatting the data ################################################################
 
 library(plyr)
@@ -477,10 +434,6 @@ library(plyr)
 Association_data <- ddply(rules_data,c("InvoiceNo"),
                          function(x)paste(x$Description,
                                            collapse = ","))
-
-Association_data <- ddply(rules_data,c("InvoiceNo"),
-                           function(x)paste(x$StockCode,
-                                            collapse = ","))
 
 str(Association_data)
 
@@ -499,20 +452,15 @@ write.csv(Association_data, "transactional_data.csv", quote=FALSE, row.names = F
 library(arules)
 transactional_data <- read.transactions('transactional_data.csv', format = 'basket', sep=',', quote="")
 
-rules.03 <- apriori(transactional_data, parameter=list(support=0.035, confidence = 0.7))
-# 4
+rules.04 <- apriori(transactional_data, parameter=list(support=0.04, confidence = 0.5))
 
-rules.02 <- apriori(transactional_data, parameter=list(support=0.02, confidence = 0.7))
-# 12
+rules.03 <- apriori(transactional_data, parameter=list(support=0.03, confidence = 0.5))
 
-rules.01 <- apriori(transactional_data, parameter=list(support=0.017, confidence = 0.7))
-# 32
+rules.029 <- apriori(transactional_data, parameter=list(support=0.029, confidence = 0.5))
 
-rules.009 <- apriori(transactional_data, parameter=list(support=0.009, confidence = 1.0))
+inspect(sort(rules.029, by='confidence'))
 
-inspect(sort(rules.02, by='support'))
-
-rules <- sort(rules.009, by='lift')
+rules <- sort(rules.029, by='confidence')
 
 # Prune the Redundant Rules ####################################################
 
@@ -533,7 +481,7 @@ inspect(rules.pruned)
 # We evaluate the association rules with support, confidence, lift values
 interestMeasure(rules.pruned, c("support", "confidence", "lift"), transactional_data)
 
-inspect(sort(rules.pruned, by='lift'))
+inspect(sort(rules.pruned, by='confidence'))
 
 # install.packages("arulesViz")
 library(grid)
