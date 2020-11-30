@@ -171,8 +171,8 @@ KM_Model2$centers
 #y <- KM_data1$Cluster
 
 #library(caret)
-set.seed(123)
-KNN_Model1 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
+#set.seed(123)
+#KNN_Model1 <- train(x,y, 'knn', trControl=trainControl(method='cv', number=10),
                    tuneGrid=expand.grid(k=1:10))
 print(KNN_Model1)
 
