@@ -1,7 +1,4 @@
-# Set working directory and Load retail data into R session
-
-# setwd("/Users/ram/dev/bhavya/Data-Mining-Project")
-
+# Load retail data into R session
 install.packages("openxlsx")
 library(openxlsx)
 
@@ -46,6 +43,7 @@ summary(retail_data)
 # Monetary: Total amount spent by the Customer
 
 ## Recency
+# max Invoice Date
 max_date <- max(retail_data$InvoiceDate)
 max_date
 
@@ -79,16 +77,19 @@ Monetry <- retail_data %>%
                 group_by(CustomerID) %>%
                 summarize(Total = sum(Total_Price))
 
+# merge Recency, Frequency and Monetary values by CustomerID
 RF <- merge(Recency, Frequency, by='CustomerID')
 RFM <- merge(RF, Monetry, by='CustomerID')
-colnames(RFM) <- c('CustomerID', 'Recency', 'Frequency', 'Monetry')
+colnames(RFM) <- c('CustomerID', 'Recency', 'Frequency', 'Monetary')
 
+# structure of the RFM data
 str(RFM)
-head(RFM)
+
+# Summary of the RFM data
 summary(RFM)
 
 
-## RFM data re-processing ######################################################
+## RFM data pre-processing ######################################################
 
 # Check for outliers
 boxplot(RFM[-1], main="Boxplot for RFM values")
@@ -100,15 +101,15 @@ RFM_data <- RFM[-which(RFM$Recency %in% Recency_outliers),]
 Frequency_outliers <- boxplot(RFM$Frequency, plot=FALSE)$out
 RFM_data <- RFM[-which(RFM$Frequency %in% Frequency_outliers),]
 
-Monetry_outliers <- boxplot(RFM$Monetry, plot=FALSE)$out
-RFM_data <- RFM[-which(RFM$Monetry %in% Monetry_outliers),]
+Monetary_outliers <- boxplot(RFM$Monetary, plot=FALSE)$out
+RFM_data <- RFM[-which(RFM$Monetary %in% Monetary_outliers),]
 
 # Structure of RFM_data
 str(RFM_data)
 # 3911
 
 # Scale the Numerical Variables
-vars <- c('Recency','Frequency','Monetry')
+vars <- c('Recency','Frequency','Monetary')
 Clust_Data <- data.frame(RFM_data[-1])
 Clust_Data[vars] <- lapply(RFM_data[vars], scale)
 head(Clust_Data)
@@ -270,6 +271,8 @@ filter(RFM_data, RFM_data$CustomerID %in% customers_2)
 #################################################################################
 # Association Rules #############################################################
 # Pre-Processing ################################################################
+
+# Check for the missing values
 colSums(is.na(data))
 library(tidyr)
 
@@ -282,8 +285,8 @@ summary(rules_data)
 rules_data <- rules_data[rules_data$Quantity >= 0,]
 rules_data <- rules_data[rules_data$UnitPrice > 0,]
 
-# str(rules_data)
 
+# Check for the unique StockCode and Description
 length(unique(rules_data$StockCode))
 length(unique(rules_data$Description))
 
@@ -302,6 +305,7 @@ head(rules_data[grepl('[:lower:]', rules_data$Description),])
 rules_data <- rules_data[rules_data$Description != 'Manual',]
 
 library(dplyr)
+
 # Identify the StockCodes having two descriptions and use the descriptions to process the multi descriptions
 df <- data.frame(rules_data %>%
   select(StockCode, Description) %>%
@@ -443,7 +447,7 @@ Association_data$items <- as.factor(Association_data$items)
 
 str(Association_data)
 
-# To view the transactional_data in the better format
+# To view the transactions data in the better format
 write.csv(Association_data, "transactional_data.csv", quote=FALSE, row.names = FALSE)
 
 ## Building Association rules ########################################################
